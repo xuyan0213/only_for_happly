@@ -6,14 +6,6 @@
 # cron "30 4 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('天翼云盘签到');
 
-# #!/usr/bin/python3
-# # -- coding: utf-8 --
-# # @Time : 2023/4/4 9:23
-# #作者：https://www.52pojie.cn/thread-1231190-1-1.html
-# # -------------------------------
-# # cron "30 4 * * *" script-path=xxx.py,tag=匹配cron用
-# # const $ = new Env('天翼云盘签到');
-#
 
 
 import time
@@ -26,13 +18,13 @@ import rsa
 import requests
 import random
 import os
+import notify
+from notify import Notify
 
 # 变量 ty_username（手机号）,ty_password（密码）
 ty_username = os.getenv("ty_username").split('&')
 ty_password = os.getenv("ty_password").split('&')
 
-# 推送加
-plustoken = os.getenv("plustoken")
 
 
 BI_RM = list("0123456789abcdefghijklmnopqrstuvwxyz")
@@ -210,7 +202,27 @@ for i in range(len(ty_username)):
             print(f"链接3抽奖获得{description}")
             res4 = f"链接3抽奖获得{description}"
         message = res1+res2+res3+res4
-        Push(contents=message)
+
+        pushplus_token = os.environ.get('PUSHPLUS_TOKEN')
+        serverChan_sendkey = os.environ.get('SERVERCHAN_SENDKEY')
+        weCom_tokens = os.environ.get('WECOM_TOKENS')
+        weCom_webhook = os.environ.get('WECOM_WEBHOOK')
+        bark_deviceKey = os.environ.get('BARK_DEVICEKEY')
+        feishu_deviceKey = os.environ.get('FEISHU_DEVICEKEY')
+        message_tokens = {
+    'pushplus_token': pushplus_token,
+    'serverChan_token': serverChan_sendkey,
+    'weCom_tokens': weCom_tokens,
+    'weCom_webhook': weCom_webhook,
+    'bark_deviceKey': bark_deviceKey,
+    'feishu_deviceKey': feishu_deviceKey,
+}
+        title = '天翼云签到'
+        message_all = '\n'.join(message)
+        message_all = re.sub('\n+', '\n', message_all).rstrip('\n')
+
+        message_send = Notify()
+        message_send.send_all(message_tokens, title, message_all)
 
 
     def lambda_handler(event, context):  # aws default
