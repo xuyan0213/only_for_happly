@@ -7,24 +7,19 @@
 # const $ = new Env('天翼云盘签到');
 
 
-
 import time
 import re
-import json
 import base64
 import hashlib
-import urllib.parse, hmac
 import rsa
 import requests
 import random
 import os
-import notify
 from notify import Notify
 
 # 变量 ty_username（手机号）,ty_password（密码）
 ty_username = os.getenv("ty_username").split('&')
 ty_password = os.getenv("ty_password").split('&')
-
 
 
 BI_RM = list("0123456789abcdefghijklmnopqrstuvwxyz")
@@ -37,13 +32,6 @@ s = requests.Session()
 for i in range(len(ty_username)):
     print(f'开始执行帐号{i+1}')
 
-    #推送函数
-    def Push(contents):
-        # 推送加
-        headers = {'Content-Type': 'application/json'}
-        json = {"token": plustoken, 'title': '天翼云签到', 'content': contents.replace('\n', '<br>'), "template": "json"}
-        resp = requests.post(f'http://www.pushplus.plus/send', json=json, headers=headers).json()
-        print('push+推送成功' if resp['code'] == 200 else 'push+推送失败')
     def int2char(a):
         return BI_RM[a]
 
@@ -170,38 +158,7 @@ for i in range(len(ty_username)):
             print(f"已经签到过了，签到获得{netdiskBonus}M空间")
             res1 = f"已经签到过了，签到获得{netdiskBonus}M空间"
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G930K Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile Safari/537.36 Ecloud/8.6.3 Android/22 clientId/355325117317828 clientModel/SM-G930K imsi/460071114317824 clientChannelId/qq proVersion/1.0.6',
-            "Referer": "https://m.cloud.189.cn/zhuanti/2016/sign/index.jsp?albumBackupOpened=1",
-            "Host": "m.cloud.189.cn",
-            "Accept-Encoding": "gzip, deflate",
-        }
-        response = s.get(url, headers=headers)
-        if ("errorCode" in response.text):
-            print(response.text)
-            res2 = ""
-        else:
-            description = response.json()['description']
-            print(f"抽奖获得{description}")
-            res2 = f"抽奖获得{description}"
-        response = s.get(url2, headers=headers)
-        if ("errorCode" in response.text):
-            print(response.text)
-            res3 = ""
-        else:
-            description = response.json()['description']
-            print(f"抽奖获得{description}")
-            res3 = f"抽奖获得{description}"
-
-        response = s.get(url3, headers=headers)
-        if ("errorCode" in response.text):
-            print(response.text)
-            res4 = ""
-        else:
-            description = response.json()['description']
-            print(f"链接3抽奖获得{description}")
-            res4 = f"链接3抽奖获得{description}"
-        message = res1+res2+res3+res4
+        message = res1
 
         pushplus_token = os.environ.get('PUSHPLUS_TOKEN')
         serverChan_sendkey = os.environ.get('SERVERCHAN_SENDKEY')
@@ -210,19 +167,16 @@ for i in range(len(ty_username)):
         bark_deviceKey = os.environ.get('BARK_DEVICEKEY')
         feishu_deviceKey = os.environ.get('FEISHU_DEVICEKEY')
         message_tokens = {
-    'pushplus_token': pushplus_token,
-    'serverChan_token': serverChan_sendkey,
-    'weCom_tokens': weCom_tokens,
-    'weCom_webhook': weCom_webhook,
-    'bark_deviceKey': bark_deviceKey,
-    'feishu_deviceKey': feishu_deviceKey,
-}
+            'pushplus_token': pushplus_token,
+            'serverChan_token': serverChan_sendkey,
+            'weCom_tokens': weCom_tokens,
+            'weCom_webhook': weCom_webhook,
+            'bark_deviceKey': bark_deviceKey,
+            'feishu_deviceKey': feishu_deviceKey,
+        }
         title = '天翼云签到'
-        message_all = '\n'.join(message)
-        message_all = re.sub('\n+', '\n', message_all).rstrip('\n')
-
         message_send = Notify()
-        message_send.send_all(message_tokens, title, message_all)
+        message_send.send_all(message_tokens, title, message)
 
 
     def lambda_handler(event, context):  # aws default
