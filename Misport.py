@@ -128,6 +128,21 @@ class MiMotion:
             msg_all += msg + "\n\n"
         return msg_all
 
+async function SendMsg(message) {
+    if (!message)
+        return;
+    if (Notify > 0) {
+        if ($.isNode()) {
+            const notify = require('./sendNotify');
+            await notify.sendNotify($.name, message);
+        } else {
+            $.msg(message);
+        }
+    } else {
+        log(message);
+    }
+}
+
 def string_to_dict(s):
     parts = s.split('-')
     result_dict = {}
@@ -146,6 +161,7 @@ def start():
         result = MiMotion(check_items=_check_items).main()
         print(result)
         print('*'*15)
+        await SendMsg(msg);
 
 
 
